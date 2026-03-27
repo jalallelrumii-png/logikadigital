@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Logika Digital — Agency Intelligence System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* =============================================
+   CSS VARIABLES & RESET
+   ============================================= */
+:root {
+  --bg-base:       #060b14;
+  --bg-surface:    #0c1322;
+  --bg-card:       #111827;
+  --bg-card-hover: #141f30;
+  --bg-input:      #0d1826;
+  --border:        rgba(255,255,255,0.06);
+  --border-glow:   rgba(0, 212, 170, 0.3);
+
+  --text-primary:  #f0f4ff;
+  --text-secondary:#8a9bbf;
+  --text-muted:    #4a5a78;
+
+  --grad-primary:  linear-gradient(135deg, #00d4aa 0%, #2563eb 100%);
+  --grad-subtle:   linear-gradient(135deg, rgba(0,212,170,0.12) 0%, rgba(37,99,235,0.12) 100%);
+  --grad-glow:     linear-gradient(135deg, rgba(0,212,170,0.25) 0%, rgba(37,99,235,0.25) 100%);
+
+  --accent-teal:   #00d4aa;
+  --accent-blue:   #2563eb;
+  --accent-amber:  #f59e0b;
+  --accent-rose:   #f43f5e;
+  --accent-violet: #7c3aed;
+
+  --sidebar-w: 240px;
+  --radius:    12px;
+  --radius-sm: 8px;
+  --shadow:    0 4px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 48px rgba(0,0,0,0.6);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 14px; scroll-behavior: smooth; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(0,212,170,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(37,99,235,0.05) 0%, transparent 60%);
+}
+
+/* =============================================
+   SCROLLBAR
+   ============================================= */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* =============================================
+   SIDEBAR
+   ============================================= */
+#sidebar {
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-logo .logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 34px; height: 34px;
+  background: var(--grad-primary);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  box-shadow: 0 0 20px rgba(0,212,170,0.3);
+  flex-shrink: 0;
+}
+
+.logo-text { line-height: 1.1; }
+.logo-text strong { font-size: 12px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.02em; display: block; }
+.logo-text span { font-size: 10px; color: var(--text-muted); font-weight: 400; }
+
+.sidebar-section-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 18px 20px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  margin: 2px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+.nav-item.active {
+  background: var(--grad-subtle);
+  border-color: var(--border-glow);
+  color: var(--accent-teal);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 20%; bottom: 20%;
+  width: 2px;
+  background: var(--grad-primary);
+  border-radius: 2px;
+}
+
+.nav-icon { font-size: 15px; flex-shrink: 0; width: 20px; text-align: center; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--accent-rose);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 99px;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 16px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.jessica-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--grad-subtle);
+  border: 1px solid var(--border-glow);
+  cursor: pointer;
+}
+
+.jessica-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--grad-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.jessica-info strong { font-size: 11.5px; font-weight: 600; color: var(--text-primary); display: block; }
+.jessica-info span { font-size: 10px; color: var(--accent-teal); }
+
+/* =============================================
+   MAIN LAYOUT
+   ============================================= */
+#main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =============================================
+   TOP BAR
+   ============================================= */
+#topbar {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  background: rgba(6,11,20,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.topbar-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.topbar-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+.topbar-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 5px 12px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.topbar-pill:hover { border-color: var(--border-glow); color: var(--accent-teal); }
+.topbar-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-teal); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* =============================================
+   PAGE SECTIONS
+   ============================================= */
+.page { display: none; padding: 28px; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* =============================================
+   PAGE HEADER
+   ============================================= */
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+.page-header h1 span { background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.page-header p { font-size: 12.5px; color: var(--text-secondary); margin-top: 4px; }
+
+/* =============================================
+   STAT CARDS
+   ============================================= */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: var(--grad-primary); opacity: 0;
+  transition: opacity 0.25s;
+}
+.stat-card:hover { border-color: rgba(0,212,170,0.2); transform: translateY(-2px); box-shadow: var(--shadow); }
+.stat-card:hover::after { opacity: 1; }
+
+.stat-icon {
+  font-size: 20px;
+  margin-bottom: 12px;
+  display: inline-block;
+}
+.stat-value { font-size: 26px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+.stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
+.stat-delta {
+  font-size: 10.5px;
+  margin-top: 8px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 7px;
+  border-radius: 99px;
+  font-weight: 500;
+}
+.stat-delta.up { background: rgba(0,212,170,0.12); color: var(--accent-teal); }
+.stat-delta.down { background: rgba(244,63,94,0.12); color: var(--accent-rose); }
+.stat-delta.neutral { background: rgba(245,158,11,0.12); color: var(--accent-amber); }
+
+/* =============================================
+   GRID LAYOUTS
+   ============================================= */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.col-span-2 { grid-column: span 2; }
+
+/* =============================================
+   CARDS
+   ============================================= */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-title { font-size: 13px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 7px; }
+.card-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.card-action { font-size: 11px; color: var(--accent-teal); cursor: pointer; font-weight: 500; }
+
+/* =============================================
+   AGENT TABLE
+   ============================================= */
+.agent-table-wrap { overflow-x: auto; }
+
+.filter-row {
+  display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;
+}
+
+.filter-btn {
+  padding: 5px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+.filter-btn:hover, .filter-btn.active {
+  background: var(--grad-subtle);
+  border-color: var(--border-glow);
+  color: var(--accent-teal);
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+thead tr { border-bottom: 1px solid var(--border); }
+th { padding: 8px 12px; text-align: left; font-size: 10.5px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+td { padding: 12px 12px; color: var(--text-secondary); border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+tbody tr { transition: background 0.15s; }
+tbody tr:hover { background: var(--bg-card-hover); }
+
+.agent-name-cell { display: flex; align-items: center; gap: 9px; }
+.agent-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+
+.score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.score-bar {
+  flex: 1; max-width: 80px; height: 4px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 99px; overflow: hidden;
+}
+.score-bar-fill { height: 100%; border-radius: 99px; background: var(--grad-primary); }
+.score-num { font-size: 11px; font-weight: 600; color: var(--text-primary); min-width: 24px; }
+
+.status-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 99px; font-size: 10.5px; font-weight: 600;
+}
+.status-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+.badge-green { background: rgba(0,212,170,0.1); color: #00d4aa; border: 1px solid rgba(0,212,170,0.2); }
+.badge-green::before { background: #00d4aa; }
+.badge-amber { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+.badge-amber::before { background: #f59e0b; }
+.badge-rose { background: rgba(244,63,94,0.1); color: #f43f5e; border: 1px solid rgba(244,63,94,0.2); }
+.badge-rose::before { background: #f43f5e; }
+.badge-blue { background: rgba(37,99,235,0.1); color: #60a5fa; border: 1px solid rgba(37,99,235,0.2); }
+.badge-blue::before { background: #60a5fa; }
+
+.action-btn-sm {
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 10.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+}
+.action-btn-sm:hover { border-color: var(--border-glow); color: var(--accent-teal); background: var(--grad-subtle); }
+
+/* =============================================
+   SCENARIO TAGS
+   ============================================= */
+.scenario-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.scenario-tag {
+  padding: 5px 11px; border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary); font-size: 11.5px;
+  cursor: pointer; transition: all 0.2s;
+  font-weight: 500;
+}
+.scenario-tag:hover {
+  border-color: var(--border-glow);
+  background: var(--grad-subtle); color: var(--text-primary);
+}
+.scenario-tag.selected {
+  border-color: var(--accent-teal); background: rgba(0,212,170,0.1); color: var(--accent-teal);
+}
+
+/* =============================================
+   STRATEGY LAB — JESSICA BRAIN
+   ============================================= */
+.lab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.brain-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.brain-panel-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(0,212,170,0.05) 0%, rgba(37,99,235,0.05) 100%);
+  display: flex; align-items: center; gap: 10px;
+}
+.brain-panel-header h3 { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.brain-panel-header p { font-size: 10.5px; color: var(--text-muted); margin-top: 2px; }
+
+.brain-panel-body { padding: 18px 20px; }
+
+.input-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.04em; margin-bottom: 7px; display: flex; align-items: center; gap: 5px; }
+
+.brain-textarea {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 12px 14px;
+  resize: vertical;
+  min-height: 110px;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.brain-textarea:focus { border-color: var(--accent-teal); box-shadow: 0 0 0 3px rgba(0,212,170,0.08); }
+.brain-textarea::placeholder { color: var(--text-muted); font-size: 12.5px; }
+
+.upload-zone {
+  margin-top: 12px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; transition: all 0.2s;
+  background: var(--bg-input);
+}
+.upload-zone:hover { border-color: rgba(0,212,170,0.3); background: rgba(0,212,170,0.04); }
+.upload-zone-icon { font-size: 20px; }
+.upload-zone-text strong { font-size: 12px; color: var(--text-primary); font-weight: 500; display: block; }
+.upload-zone-text span { font-size: 10.5px; color: var(--text-muted); }
+#fileInput { display: none; }
+
+.quick-scenarios { margin-top: 14px; }
+.quick-scenarios p { font-size: 10.5px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
+
+.cta-analyze {
+  width: 100%;
+  margin-top: 16px;
+  padding: 13px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--grad-primary);
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.25s;
+  box-shadow: 0 4px 20px rgba(0,212,170,0.25);
+  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
+}
+.cta-analyze::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+  opacity: 0; transition: opacity 0.2s;
+}
+.cta-analyze:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(0,212,170,0.4); }
+.cta-analyze:hover::before { opacity: 1; }
+.cta-analyze:active { transform: translateY(0); }
+.cta-analyze:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* =============================================
+   BRIEFING CARD OUTPUT
+   ============================================= */
+.output-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  min-height: 400px;
+  display: flex; flex-direction: column;
+}
+
+.output-panel-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, rgba(0,212,170,0.05) 0%, rgba(37,99,235,0.05) 100%);
+}
+
+.output-status {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+}
+.output-status .live-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted);
+}
+.output-status.active { color: var(--accent-teal); }
+.output-status.active .live-dot { background: var(--accent-teal); animation: pulse 1.5s infinite; }
+
+.output-body { flex: 1; padding: 20px; overflow-y: auto; }
+
+/* Loading state */
+.loading-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; min-height: 280px; gap: 14px;
+}
+.loading-orb {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,212,170,0.2);
+  border-top-color: var(--accent-teal);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-state p { font-size: 12.5px; color: var(--text-secondary); font-weight: 500; }
+.loading-state .step { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+/* Empty state */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; min-height: 280px; gap: 10px; text-align: center;
+  padding: 20px;
+}
+.empty-state .empty-icon { font-size: 40px; opacity: 0.2; margin-bottom: 4px; }
+.empty-state p { font-size: 12.5px; color: var(--text-muted); max-width: 260px; line-height: 1.7; }
+
+/* Briefing card content */
+.briefing-card { animation: fadeIn 0.5s ease; }
+
+.briefing-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.briefing-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 99px;
+  background: var(--grad-subtle);
+  border: 1px solid var(--border-glow);
+  color: var(--accent-teal); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.briefing-ts { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+.briefing-section { margin-bottom: 16px; }
+.briefing-section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent-teal); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.brief-prose {
+  font-size: 13px; color: var(--text-secondary);
+  line-height: 1.75; background: var(--bg-input);
+  border-left: 2px solid var(--accent-teal);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.disc-tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.disc-tag {
+  padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 600;
+}
+
+.copy-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: var(--radius-sm);
+  background: var(--bg-input); border: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 11px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif;
+  margin-top: 4px;
+}
+.copy-btn:hover { border-color: var(--border-glow); color: var(--accent-teal); }
+
+/* =============================================
+   CHART CANVAS
+   ============================================= */
+.chart-wrap { position: relative; width: 100%; }
+
+/* =============================================
+   ACTIVITY FEED
+   ============================================= */
+.activity-list { display: flex; flex-direction: column; gap: 0; }
+.activity-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  margin-top: 4px; flex-shrink: 0;
+}
+.activity-content p { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.activity-content span { font-size: 10.5px; color: var(--text-muted); }
+.activity-content strong { color: var(--text-primary); font-weight: 500; }
+
+/* =============================================
+   OPPORTUNITY MATRIX
+   ============================================= */
+.matrix-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 6px;
+  height: 200px;
+}
+.matrix-cell {
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  position: relative; overflow: hidden;
+  font-size: 10px;
+}
+.matrix-cell .cell-label { font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.6; }
+.matrix-cell .cell-count { font-size: 22px; font-weight: 700; line-height: 1; margin-bottom: 2px; }
+.mc-1 { background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.2); color: var(--accent-teal); }
+.mc-2 { background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.2); color: #60a5fa; }
+.mc-3 { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: var(--accent-amber); }
+.mc-4 { background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.2); color: var(--accent-rose); }
+
+/* =============================================
+   SETTINGS PAGE
+   ============================================= */
+.settings-section {
+  max-width: 600px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.settings-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.settings-card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.settings-card-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+.form-group label { font-size: 11px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.04em; display: block; margin-bottom: 6px; }
+
+.form-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--accent-teal); box-shadow: 0 0 0 3px rgba(0,212,170,0.08); }
+.form-input::placeholder { color: var(--text-muted); font-family: 'Poppins', sans-serif; font-size: 11.5px; }
+
+.model-select {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'Poppins', sans-serif;
+  font-size: 12.5px;
+  padding: 9px 12px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  transition: border-color 0.2s;
+}
+.model-select:focus { border-color: var(--accent-teal); }
+.model-select option { background: var(--bg-card); }
+
+.save-btn {
+  padding: 9px 20px; border-radius: var(--radius-sm);
+  background: var(--grad-primary);
+  border: none; color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(0,212,170,0.2);
+  align-self: flex-start;
+}
+.save-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,170,0.35); }
+
+.form-hint { font-size: 10.5px; color: var(--text-muted); margin-top: -8px; line-height: 1.5; }
+
+.success-toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--bg-card);
+  border: 1px solid rgba(0,212,170,0.3);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12.5px; color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+  z-index: 999;
+  animation: slideUp 0.3s ease;
+  pointer-events: none;
+}
+.success-toast.hide { animation: slideDown 0.3s ease forwards; }
+@keyframes slideUp { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
+@keyframes slideDown { from{transform:translateY(0);opacity:1} to{transform:translateY(16px);opacity:0} }
+
+/* =============================================
+   GRADIENT TEXT UTILITY
+   ============================================= */
+.grad-text {
+  background: var(--grad-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* =============================================
+   PERFORMANCE RINGS (Dashboard KPI)
+   ============================================= */
+.kpi-ring-wrap {
+  display: flex; align-items: center; gap: 16px;
+  padding: 10px 0;
+}
+.kpi-ring {
+  position: relative; width: 64px; height: 64px; flex-shrink: 0;
+}
+.kpi-ring svg { transform: rotate(-90deg); }
+.kpi-ring-val {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: var(--text-primary);
+}
+.kpi-ring-info strong { font-size: 15px; font-weight: 700; color: var(--text-primary); display: block; }
+.kpi-ring-info span { font-size: 11px; color: var(--text-secondary); }
+
+/* =============================================
+   DIVIDER
+   ============================================= */
+.divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+/* =============================================
+   AGENT CARD (mobile-like detail)
+   ============================================= */
+.agent-detail-modal {
+  display: none;
+  position: fixed; inset: 0;
+  z-index: 100;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+}
+.agent-detail-modal.open { display: flex; }
+.agent-detail-inner {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 420px; max-width: 95vw;
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+  box-shadow: var(--shadow-lg);
+}
+.modal-close {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 13px; color: var(--text-secondary);
+}
+.modal-close:hover { background: rgba(244,63,94,0.1); border-color: var(--accent-rose); color: var(--accent-rose); }
+
+/* Responsive compact */
+@media (max-width: 960px) {
+  :root { --sidebar-w: 56px; }
+  .nav-item span, .sidebar-logo .logo-text, .sidebar-section-label, .jessica-info { display: none; }
+  .nav-item { justify-content: center; padding: 10px; }
+  .nav-item.active::before { display: none; }
+  .nav-badge { display: none; }
+  .jessica-profile { justify-content: center; padding: 8px; }
+  .stats-grid { grid-template-columns: repeat(2,1fr); }
+  .grid-2 { grid-template-columns: 1fr; }
+  .lab-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- =============================================
+     SIDEBAR
+     ============================================= -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">🧠</div>
+      <div class="logo-text">
+        <strong>LOGIKA DIGITAL</strong>
+        <span>Agency Intelligence v2.1</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-section-label">Navigasi</div>
+
+  <a class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+    <span class="nav-icon">📊</span>
+    <span>Dashboard</span>
+  </a>
+  <a class="nav-item" data-page="agents" onclick="navigate('agents')">
+    <span class="nav-icon">👥</span>
+    <span>Agent Factory</span>
+    <span class="nav-badge">2</span>
+  </a>
+  <a class="nav-item" data-page="lab" onclick="navigate('lab')">
+    <span class="nav-icon">🧠</span>
+    <span>Strategy Lab</span>
+  </a>
+
+  <div class="sidebar-section-label">Sistem</div>
+
+  <a class="nav-item" data-page="settings" onclick="navigate('settings')">
+    <span class="nav-icon">⚙️</span>
+    <span>Pengaturan</span>
+  </a>
+
+  <div class="sidebar-bottom">
+    <div class="jessica-profile">
+      <div class="jessica-avatar">👑</div>
+      <div class="jessica-info">
+        <strong>Jessica</strong>
+        <span>Top Leader · Allianz</span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- =============================================
+     MAIN CONTENT
+     ============================================= -->
+<div id="main">
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">📊 Dashboard Overview</div>
+      <div class="topbar-subtitle" id="topbar-sub">Pantau performa tim & peluang konversi real-time</div>
+    </div>
+    <div class="topbar-actions">
+      <div class="topbar-pill">
+        <div class="dot"></div>
+        <span>Sistem Aktif</span>
+      </div>
+      <div class="topbar-pill" id="clock-pill">—</div>
+    </div>
+  </div>
+
+  <!-- ==================== PAGE: DASHBOARD ==================== -->
+  <section class="page active" id="page-dashboard">
+    <div class="page-header">
+      <h1>Selamat Datang, <span>Jessica</span> 👑</h1>
+      <p>Ringkasan performa tim Allianz & aktivitas AI Brain hari ini — semua dalam satu layar.</p>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value">5</div>
+        <div class="stat-label">Total Agen Aktif</div>
+        <div class="stat-delta neutral">↔ Stabil bulan ini</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value">68<span style="font-size:16px;color:var(--text-secondary)">%</span></div>
+        <div class="stat-label">Rata-rata Conversion Rate</div>
+        <div class="stat-delta up">↑ +12% vs bulan lalu</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🛡️</div>
+        <div class="stat-value">34</div>
+        <div class="stat-label">Polis Baru Bulan Ini</div>
+        <div class="stat-delta up">↑ +7 dari target</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🧠</div>
+        <div class="stat-value">127</div>
+        <div class="stat-label">Analisa AI Dijalankan</div>
+        <div class="stat-delta up">↑ +43 minggu ini</div>
+      </div>
+    </div>
+
+    <!-- CHARTS + ACTIVITY ROW -->
+    <div class="grid-2" style="margin-bottom:16px">
+      <!-- Funnel Chart -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📈 Funnel Konversi Tim</div>
+            <div class="card-subtitle">Prospek → Closing bulan berjalan</div>
+          </div>
+          <span class="card-action">Detail →</span>
+        </div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="funnelChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Opportunity Matrix -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🎯 Matriks Peluang Strategis</div>
+            <div class="card-subtitle">Distribusi kasus berdasarkan prioritas</div>
+          </div>
+        </div>
+        <div class="matrix-grid">
+          <div class="matrix-cell mc-1">
+            <div class="cell-count">18</div>
+            <div class="cell-label">🔥 Hot Leads</div>
+          </div>
+          <div class="matrix-cell mc-2">
+            <div class="cell-count">24</div>
+            <div class="cell-label">🌱 Nurture Stage</div>
+          </div>
+          <div class="matrix-cell mc-3">
+            <div class="cell-count">11</div>
+            <div class="cell-label">⚠️ Objeksi Aktif</div>
+          </div>
+          <div class="matrix-cell mc-4">
+            <div class="cell-count">6</div>
+            <div class="cell-label">🚨 Butuh Coaching</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI + ACTIVITY ROW -->
+    <div class="grid-2">
+      <!-- Top Agent KPIs -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🏆 KPI Top 3 Agen</div>
+        </div>
+        <div id="kpiRings"></div>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">⚡ Aktivitas Terkini</div>
+            <div class="card-subtitle">Update real-time sistem & tim</div>
+          </div>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent-teal)"></div>
+            <div class="activity-content">
+              <p><strong>Rini Kusuma</strong> menyelesaikan 2 analisa objeksi via Strategy Lab</p>
+              <span>2 menit lalu</span>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent-blue)"></div>
+            <div class="activity-content">
+              <p><strong>Sistem AI Brain</strong> menghasilkan 4 skrip persuasi baru</p>
+              <span>15 menit lalu</span>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent-amber)"></div>
+            <div class="activity-content">
+              <p><strong>Budi Santoso</strong> membutuhkan sesi coaching — conversion drop 18%</p>
+              <span>1 jam lalu</span>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent-teal)"></div>
+            <div class="activity-content">
+              <p><strong>Dewi Rahayu</strong> menutup 3 polis baru — produk Allianz Personal Guard</p>
+              <span>3 jam lalu</span>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent-rose)"></div>
+            <div class="activity-content">
+              <p><strong>Ahmad Fauzi</strong> di-flag: 2 nasabah batalkan meeting berturut-turut</p>
+              <span>5 jam lalu</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== PAGE: AGENTS ==================== -->
+  <section class="page" id="page-agents">
+    <div class="page-header">
+      <h1>👥 <span>Agent Factory</span></h1>
+      <p>Kelola, pantau, dan tingkatkan performa setiap agen dalam jaringan Anda.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📋 Daftar Agen Aktif</div>
+          <div class="card-subtitle">5 agen terdaftar — status diperbarui otomatis</div>
+        </div>
+        <button class="action-btn-sm" onclick="showToast('Fitur tambah agen dalam pengembangan')">+ Tambah Agen</button>
+      </div>
+
+      <div class="filter-row">
+        <span style="font-size:11px;color:var(--text-muted);font-weight:600;margin-right:4px">Filter:</span>
+        <button class="filter-btn active" onclick="filterAgents('all', this)">Semua Agen</button>
+        <button class="filter-btn" onclick="filterAgents('high', this)">🔥 High Performer</button>
+        <button class="filter-btn" onclick="filterAgents('struggling', this)">⚠️ Perlu Perhatian</button>
+        <button class="filter-btn" onclick="filterAgents('risk', this)">🚨 Berisiko</button>
+      </div>
+
+      <div class="agent-table-wrap">
+        <table id="agentTable">
+          <thead>
+            <tr>
+              <th>Agen</th>
+              <th>Skor Performa</th>
+              <th>Total Kasus</th>
+              <th>Closing Rate</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="agentTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Agent stats row -->
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">📈 Distribusi Performa</div>
+        <div class="chart-wrap" style="height:160px"><canvas id="agentPieChart"></canvas></div>
+      </div>
+      <div class="card col-span-2">
+        <div class="card-title" style="margin-bottom:12px">📊 Skor Performa per Agen</div>
+        <div class="chart-wrap" style="height:160px"><canvas id="agentBarChart"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== PAGE: STRATEGY LAB ==================== -->
+  <section class="page" id="page-lab">
+    <div class="page-header">
+      <h1>🧠 <span>Strategy Lab</span> — Jessica Brain</h1>
+      <p>Masukkan objeksi atau kasus nasabah, dan biarkan AI Clone Jessica menganalisis strateginya.</p>
+    </div>
+
+    <div class="lab-grid">
+      <!-- INPUT PANEL -->
+      <div class="brain-panel">
+        <div class="brain-panel-header">
+          <span style="font-size:22px">💬</span>
+          <div>
+            <h3>Input Kasus Nasabah</h3>
+            <p>Jelaskan objeksi atau situasi yang dihadapi agen Anda</p>
+          </div>
+        </div>
+        <div class="brain-panel-body">
+          <div class="input-label">💬 Objeksi / Kasus Nasabah</div>
+          <textarea id="objeksiInput" class="brain-textarea"
+            placeholder="Contoh: Nasabah berkata 'Saya sudah punya asuransi dari kantor, jadi tidak perlu tambah lagi. Lagipula preminya mahal.' Agen merasa bingung harus merespons bagaimana..."></textarea>
+
+          <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" accept="image/*,.pdf" onchange="handleFileUpload(this)" />
+            <span class="upload-zone-icon">📎</span>
+            <div class="upload-zone-text">
+              <strong>Upload Foto Ilustrasi / Polis</strong>
+              <span id="uploadLabel">Klik untuk upload — JPG, PNG, PDF (OCR Simulasi)</span>
+            </div>
+          </div>
+
+          <div class="quick-scenarios">
+            <p>🚀 Skenario Cepat — klik untuk isi otomatis:</p>
+            <div class="scenario-grid" id="scenarioTags"></div>
+          </div>
+
+          <button class="cta-analyze" id="analyzeBtn" onclick="runAnalysis()">
+            <span>🧠</span>
+            <span>Jalankan Analisa Logika Digital</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- OUTPUT PANEL -->
+      <div class="output-panel">
+        <div class="output-panel-header">
+          <div>
+            <div class="card-title" style="font-size:12px">📋 STRATEGIC BRIEFING CARD</div>
+            <div class="card-subtitle" style="font-size:10px">Output AI Jessica Brain — Rahasia Tim</div>
+          </div>
+          <div class="output-status" id="outputStatus">
+            <div class="live-dot"></div>
+            <span id="outputStatusText">Menunggu Input</span>
+          </div>
+        </div>
+        <div class="output-body" id="outputBody">
+          <div class="empty-state">
+            <div class="empty-icon">🧠</div>
+            <p>Strategic Briefing Card akan muncul di sini setelah Anda menjalankan analisa.</p>
+            <p style="font-size:10.5px;margin-top:6px;color:var(--text-muted)">Masukkan objeksi nasabah, lalu tekan tombol <strong style="color:var(--accent-teal)">Jalankan Analisa</strong>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scenario Library -->
+    <div class="card" style="margin-top:18px">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📚 Skenario Objeksi Populer</div>
+          <div class="card-subtitle">10 skenario paling umum dalam penjualan asuransi</div>
+        </div>
+      </div>
+      <div class="scenario-grid" id="fullScenarioList"></div>
+    </div>
+  </section>
+
+  <!-- ==================== PAGE: SETTINGS ==================== -->
+  <section class="page" id="page-settings">
+    <div class="page-header">
+      <h1>⚙️ <span>Pengaturan</span> Sistem</h1>
+      <p>Konfigurasi API key, model AI, dan preferensi sistem Logika Digital.</p>
+    </div>
+
+    <div class="settings-section">
+      <!-- API Configuration -->
+      <div class="settings-card">
+        <div class="settings-card-header">🔑 Konfigurasi Groq API</div>
+        <div class="settings-card-body">
+          <div class="form-group">
+            <label>GROQ API KEY</label>
+            <input type="password" class="form-input" id="apiKeyInput"
+              placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              value="" autocomplete="off" />
+          </div>
+          <div class="form-hint">API Key disimpan di sesi browser Anda. Tidak pernah dikirim ke server pihak ketiga selain Groq API.</div>
+
+          <div class="form-group">
+            <label>MODEL AI</label>
+            <select class="model-select" id="modelSelect">
+              <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Direkomendasikan)</option>
+              <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (Cepat)</option>
+              <option value="llama3-8b-8192">llama3-8b-8192</option>
+              <option value="gemma2-9b-it">gemma2-9b-it</option>
+            </select>
+          </div>
+
+          <button class="save-btn" onclick="saveSettings()">💾 Simpan Konfigurasi</button>
+        </div>
+      </div>
+
+      <!-- System Info -->
+      <div class="settings-card">
+        <div class="settings-card-header">ℹ️ Informasi Sistem</div>
+        <div class="settings-card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <div class="form-group"><label>VERSI SISTEM</label></div>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent-teal)">v2.1.0-beta</span>
+            </div>
+            <div>
+              <div class="form-group"><label>STATUS KONEKSI</label></div>
+              <span class="status-badge badge-green">Online</span>
+            </div>
+            <div>
+              <div class="form-group"><label>TOTAL ANALISA</label></div>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary)" id="totalAnalysisStat">0</span>
+            </div>
+            <div>
+              <div class="form-group"><label>ENVIRONMENT</label></div>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)">Client Browser</span>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div style="padding:12px;background:rgba(0,212,170,0.05);border:1px solid rgba(0,212,170,0.15);border-radius:var(--radius-sm)">
+            <p style="font-size:11.5px;color:var(--text-secondary);line-height:1.7">
+              <strong style="color:var(--accent-teal)">Logika Digital Agency System</strong> dibangun khusus untuk tim Jessica
+              menggunakan pendekatan <em>Digital Twin AI Duplication</em> — mengkloning logika penjualan,
+              gaya persuasi, dan strategi analogi khas Jessica ke dalam sistem AI yang dapat diakses seluruh tim.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jessica Brain Config -->
+      <div class="settings-card">
+        <div class="settings-card-header">🧠 Konfigurasi Jessica Brain</div>
+        <div class="settings-card-body">
+          <div class="form-group">
+            <label>NAMA PERSONA AI</label>
+            <input type="text" class="form-input" value="Jessica — Top Leader Allianz" style="font-family:'Poppins',sans-serif" />
+          </div>
+          <div class="form-group">
+            <label>GAYA KOMUNIKASI</label>
+            <select class="model-select">
+              <option>Profesional & Hangat (Default)</option>
+              <option>Formal Korporat</option>
+              <option>Konsultatif Santai</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>FRAMEWORK ANALISA PSIKOLOGI</label>
+            <select class="model-select">
+              <option>DISC + Value-Based Selling (Default)</option>
+              <option>DISC Only</option>
+              <option>Emotional Intelligence Framework</option>
+            </select>
+          </div>
+          <button class="save-btn" onclick="saveSettings()">💾 Simpan Preferensi</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- AGENT DETAIL MODAL -->
+<div class="agent-detail-modal" id="agentModal">
+  <div class="agent-detail-inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-size:14px;font-weight:700;color:var(--text-primary)" id="modalTitle">Detail Agen</div>
+      <div class="modal-close" onclick="closeModal()">✕</div>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="success-toast" id="toast" style="display:none">
+  <span>✅</span>
+  <span id="toastMsg">Tersimpan!</span>
+</div>
+
+<!-- =============================================
+     JAVASCRIPT
+     ============================================= -->
+<script>
+/* ===============================================
+   MOCK DATABASE
+   =============================================== */
+const AGENTS = [
+  { id: 'AGT-001', name: 'Dewi Rahayu',    avatar: '🌸', color: '#00d4aa', score: 92, cases: 47, closing: 78, status: 'high',       label: 'High Conversion' },
+  { id: 'AGT-002', name: 'Rini Kusuma',    avatar: '⭐', color: '#2563eb', score: 85, cases: 38, closing: 71, status: 'high',       label: 'High Conversion' },
+  { id: 'AGT-003', name: 'Hendra Wijaya',  avatar: '💼', color: '#7c3aed', score: 61, cases: 29, closing: 52, status: 'coaching',   label: 'Coaching Needed' },
+  { id: 'AGT-004', name: 'Budi Santoso',   avatar: '📌', color: '#f59e0b', score: 48, cases: 22, closing: 41, status: 'coaching',   label: 'Coaching Needed' },
+  { id: 'AGT-005', name: 'Ahmad Fauzi',    avatar: '🚨', color: '#f43f5e', score: 31, cases: 15, closing: 27, status: 'risk',       label: 'At Risk' },
+];
+
+const SCENARIOS = [
+  { id: 1,  label: 'Premi Terlalu Mahal',       text: 'Nasabah berkata "Saya rasa preminya terlalu mahal untuk kondisi keuangan saya sekarang. Bisa lebih murah tidak?"' },
+  { id: 2,  label: 'Sudah Ada Asuransi Kantor',  text: 'Nasabah bilang "Saya sudah punya asuransi dari kantor, jadi tidak perlu tambah lagi." Agen tidak tahu harus bilang apa.' },
+  { id: 3,  label: 'Mau Tanya Pasangan Dulu',   text: 'Calon nasabah selalu mengakhiri meeting dengan "Nanti saya diskusikan dulu dengan suami/istri ya." Sudah 3 kali meeting tapi tidak closing.' },
+  { id: 4,  label: 'Kompetitor Lebih Murah',    text: 'Nasabah membandingkan: "Saya lihat produk X dari kompetitor lebih murah dengan manfaat yang mirip. Kenapa saya harus pilih Allianz?"' },
+  { id: 5,  label: 'Tidak Percaya Asuransi',    text: 'Nasabah trauma: "Saya pernah punya asuransi jiwa sebelumnya tapi pas mau klaim dipersulit. Saya tidak mau investasi uang ke hal yang tidak jelas."' },
+  { id: 6,  label: 'Anak Masih Kecil',          text: 'Nasabah muda berkata "Anak saya masih bayi, untuk sekarang pengeluaran masih banyak. Nanti kalau sudah agak besar baru saya pikir soal asuransi."' },
+  { id: 7,  label: 'Sudah Investasi Saham',     text: 'Nasabah investor berkata "Saya sudah invest di saham dan reksa dana yang returnnya jauh lebih tinggi. Asuransi jiwa itu rugi, uang kita dikunci."' },
+  { id: 8,  label: 'Kondisi Keuangan Buruk',    text: 'Nasabah bilang "Sekarang lagi banyak cicilan, kondisi ekonomi juga tidak menentu. Tidak ada budget untuk tambah pengeluaran baru."' },
+  { id: 9,  label: 'Masih Muda & Sehat',        text: 'Nasabah muda berkata "Saya masih 28 tahun, sehat, tidak ada riwayat penyakit. Untuk apa asuransi sekarang? Nanti saja kalau sudah tua."' },
+  { id: 10, label: 'Tidak Percaya Agen',        text: 'Nasabah ragu: "Saya sudah pernah dicurangi agen asuransi. Manfaat yang dijanjikan berbeda dengan yang tertulis di polis. Bagaimana saya bisa percaya sekarang?"' },
+];
+
+/* ===============================================
+   STATE
+   =============================================== */
+let analysisCount = 0;
+let currentFilter = 'all';
+let chartsInitialized = false;
+
+/* ===============================================
+   NAVIGATION
+   =============================================== */
+const PAGE_META = {
+  dashboard: { title: '📊 Dashboard Overview',     sub: 'Pantau performa tim & peluang konversi real-time' },
+  agents:    { title: '👥 Agent Factory',           sub: 'Kelola dan tingkatkan performa agen Anda' },
+  lab:       { title: '🧠 Strategy Lab — Jessica Brain', sub: 'AI Clone Jessica siap menganalisa setiap objeksi nasabah' },
+  settings:  { title: '⚙️ Pengaturan Sistem',       sub: 'Konfigurasi API dan preferensi sistem' },
+};
+
+function navigate(page) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+  document.querySelector(`[data-page="${page}"]`).classList.add('active');
+  document.getElementById(`page-${page}`).classList.add('active');
+
+  const meta = PAGE_META[page];
+  document.getElementById('topbar-title').textContent = meta.title;
+  document.getElementById('topbar-sub').textContent = meta.sub;
+
+  if (page === 'agents') renderAgentCharts();
+  if (page === 'dashboard' && !chartsInitialized) { initDashboardCharts(); chartsInitialized = true; }
+}
+
+/* ===============================================
+   CLOCK
+   =============================================== */
+function updateClock() {
+  const now = new Date();
+  const s = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+  const d = now.toLocaleDateString('id-ID', { weekday:'short', day:'numeric', month:'short' });
+  document.getElementById('clock-pill').textContent = `${d} · ${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ===============================================
+   RENDER AGENTS
+   =============================================== */
+function renderAgentTable(filter) {
+  const tbody = document.getElementById('agentTableBody');
+  const filtered = filter === 'all' ? AGENTS
+    : filter === 'high' ? AGENTS.filter(a => a.status === 'high')
+    : filter === 'struggling' ? AGENTS.filter(a => a.status === 'coaching')
+    : AGENTS.filter(a => a.status === 'risk');
+
+  tbody.innerHTML = filtered.map(a => {
+    const badgeClass = a.status === 'high' ? 'badge-green' : a.status === 'coaching' ? 'badge-amber' : 'badge-rose';
+    return `
+    <tr>
+      <td>
+        <div class="agent-name-cell">
+          <div class="agent-avatar" style="background:${a.color}22;color:${a.color};border:1px solid ${a.color}44">${a.avatar}</div>
+          <div>
+            <div style="font-weight:600;color:var(--text-primary);font-size:12.5px">${a.name}</div>
+            <div style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">${a.id}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar"><div class="score-bar-fill" style="width:${a.score}%;background:linear-gradient(90deg,${a.color},${a.color}aa)"></div></div>
+          <span class="score-num">${a.score}</span>
+        </div>
+      </td>
+      <td style="font-weight:600;color:var(--text-primary)">${a.cases}</td>
+      <td>
+        <span style="color:${a.closing >= 70 ? 'var(--accent-teal)' : a.closing >= 50 ? 'var(--accent-amber)' : 'var(--accent-rose)'};font-weight:600">${a.closing}%</span>
+      </td>
+      <td><span class="status-badge ${badgeClass}">${a.label}</span></td>
+      <td>
+        <button class="action-btn-sm" onclick="openAgentModal(${a.id.split('-')[1]-1})">📋 Lihat</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterAgents(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAgentTable(type);
+}
+
+/* ===============================================
+   KPI RINGS
+   =============================================== */
+function renderKPIRings() {
+  const top3 = [...AGENTS].sort((a,b) => b.score - a.score).slice(0,3);
+  const container = document.getElementById('kpiRings');
+  container.innerHTML = top3.map(a => {
+    const r = 26, circ = 2 * Math.PI * r;
+    const fill = (a.score / 100) * circ;
+    return `
+    <div class="kpi-ring-wrap">
+      <div class="kpi-ring">
+        <svg width="64" height="64" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="4"/>
+          <circle cx="32" cy="32" r="${r}" fill="none" stroke="${a.color}" stroke-width="4"
+            stroke-dasharray="${fill} ${circ}" stroke-linecap="round"/>
+        </svg>
+        <div class="kpi-ring-val" style="color:${a.color}">${a.score}</div>
+      </div>
+      <div class="kpi-ring-info">
+        <strong>${a.name}</strong>
+        <span>${a.closing}% closing · ${a.cases} kasus</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ===============================================
+   CHARTS
+   =============================================== */
+function initDashboardCharts() {
+  // Funnel Chart
+  const fCtx = document.getElementById('funnelChart').getContext('2d');
+  new Chart(fCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Prospek Awal', 'Meeting 1', 'Follow-up', 'Presentasi', 'Negosiasi', 'CLOSING'],
+      datasets: [{
+        data: [120, 89, 68, 47, 38, 34],
+        backgroundColor: [
+          'rgba(37,99,235,0.7)', 'rgba(37,99,235,0.65)', 'rgba(37,99,235,0.6)',
+          'rgba(0,212,170,0.65)', 'rgba(0,212,170,0.75)', 'rgba(0,212,170,0.9)',
+        ],
+        borderRadius: 6, borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.raw} kasus`
+        },
+        backgroundColor: '#111827', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1,
+        titleColor: '#f0f4ff', bodyColor: '#8a9bbf',
+      }},
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#4a5a78', font: { family: 'Poppins', size: 10 } } },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#4a5a78', font: { family: 'Poppins', size: 10 } } }
+      }
+    }
+  });
+}
+
+function renderAgentCharts() {
+  // Pie
+  const pCtx = document.getElementById('agentPieChart').getContext('2d');
+  if (pCtx._chart) pCtx._chart.destroy();
+  const pc = new Chart(pCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['High Performer', 'Coaching Needed', 'At Risk'],
+      datasets: [{ data: [2, 2, 1], backgroundColor: ['rgba(0,212,170,0.8)', 'rgba(245,158,11,0.8)', 'rgba(244,63,94,0.8)'], borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '65%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#8a9bbf', font: { family: 'Poppins', size: 10 }, padding: 10, boxWidth: 10 } },
+        tooltip: { backgroundColor: '#111827', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, titleColor: '#f0f4ff', bodyColor: '#8a9bbf' }
+      }
+    }
+  });
+  pCtx._chart = pc;
+
+  // Bar
+  const bCtx = document.getElementById('agentBarChart').getContext('2d');
+  if (bCtx._chart) bCtx._chart.destroy();
+  const bc = new Chart(bCtx, {
+    type: 'bar',
+    data: {
+      labels: AGENTS.map(a => a.name.split(' ')[0]),
+      datasets: [{
+        label: 'Skor Performa',
+        data: AGENTS.map(a => a.score),
+        backgroundColor: AGENTS.map(a => a.color + 'cc'),
+        borderRadius: 6, borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'x',
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: '#111827', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, titleColor: '#f0f4ff', bodyColor: '#8a9bbf' }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#4a5a78', font: { family: 'Poppins', size: 10 } } },
+        y: { max: 100, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#4a5a78', font: { family: 'Poppins', size: 10 } } }
+      }
+    }
+  });
+  bCtx._chart = bc;
+}
+
+/* ===============================================
+   SCENARIO TAGS
+   =============================================== */
+function renderScenarioTags() {
+  const quickContainer = document.getElementById('scenarioTags');
+  const fullContainer = document.getElementById('fullScenarioList');
+
+  // Quick 5
+  quickContainer.innerHTML = SCENARIOS.slice(0, 5).map(s => `
+    <span class="scenario-tag" onclick="selectScenario(${s.id}, this)">${s.label}</span>
+  `).join('');
+
+  // Full 10
+  fullContainer.innerHTML = SCENARIOS.map(s => `
+    <span class="scenario-tag" style="cursor:default;padding:6px 12px">
+      <strong style="color:var(--text-primary)">${s.id}.</strong> ${s.label}
+    </span>
+  `).join('');
+}
+
+function selectScenario(id, el) {
+  document.querySelectorAll('#scenarioTags .scenario-tag').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  const scenario = SCENARIOS.find(s => s.id === id);
+  if (scenario) document.getElementById('objeksiInput').value = scenario.text;
+}
+
+/* ===============================================
+   FILE UPLOAD SIMULATION
+   =============================================== */
+function handleFileUpload(input) {
+  if (input.files && input.files[0]) {
+    const fname = input.files[0].name;
+    document.getElementById('uploadLabel').textContent = `✅ File dipilih: ${fname} — OCR akan dijalankan`;
+  }
+}
+
+/* ===============================================
+   AGENT MODAL
+   =============================================== */
+function openAgentModal(idx) {
+  const a = AGENTS[idx];
+  document.getElementById('modalTitle').textContent = `📋 Detail — ${a.name}`;
+  document.getElementById('modalBody').innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:14px;background:var(--bg-input);border-radius:var(--radius-sm);border:1px solid var(--border)">
+      <div class="agent-avatar" style="width:44px;height:44px;font-size:20px;background:${a.color}22;color:${a.color};border:1px solid ${a.color}44">${a.avatar}</div>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text-primary)">${a.name}</div>
+        <div style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;margin-top:2px">${a.id}</div>
+      </div>
+      <span class="status-badge ${a.status === 'high' ? 'badge-green' : a.status === 'coaching' ? 'badge-amber' : 'badge-rose'}" style="margin-left:auto">${a.label}</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="padding:12px;background:var(--bg-input);border-radius:var(--radius-sm);border:1px solid var(--border)">
+        <div style="font-size:9.5px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">Skor Performa</div>
+        <div style="font-size:22px;font-weight:700;color:${a.color}">${a.score}<span style="font-size:12px;color:var(--text-muted)">/100</span></div>
+      </div>
+      <div style="padding:12px;background:var(--bg-input);border-radius:var(--radius-sm);border:1px solid var(--border)">
+        <div style="font-size:9.5px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">Closing Rate</div>
+        <div style="font-size:22px;font-weight:700;color:${a.color}">${a.closing}<span style="font-size:12px;color:var(--text-muted)">%</span></div>
+      </div>
+      <div style="padding:12px;background:var(--bg-input);border-radius:var(--radius-sm);border:1px solid var(--border)">
+        <div style="font-size:9.5px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">Total Kasus</div>
+        <div style="font-size:22px;font-weight:700;color:var(--text-primary)">${a.cases}</div>
+      </div>
+      <div style="padding:12px;background:var(--bg-input);border-radius:var(--radius-sm);border:1px solid var(--border)">
+        <div style="font-size:9.5px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">Kasus Closed</div>
+        <div style="font-size:22px;font-weight:700;color:var(--text-primary)">${Math.floor(a.cases * a.closing / 100)}</div>
+      </div>
+    </div>
+
+    <button class="cta-analyze" style="margin-top:0" onclick="closeModal();navigate('lab');document.getElementById('objeksiInput').value='Bantu saya strategi coaching untuk agen ${a.name} yang memiliki closing rate ${a.closing}% dan perlu ditingkatkan.'">
+      🧠 Buka Analisa AI untuk Agen Ini
+    </button>
+  `;
+  document.getElementById('agentModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('agentModal').classList.remove('open');
+}
+
+/* ===============================================
+   GROQ API ANALYSIS — THE JESSICA BRAIN
+   =============================================== */
+async function runAnalysis() {
+  const input = document.getElementById('objeksiInput').value.trim();
+  if (!input) {
+    showToast('⚠️ Masukkan kasus atau objeksi nasabah terlebih dahulu!');
+    return;
+  }
+
+  const apiKey = document.getElementById('apiKeyInput').value.trim()
+    || '[MASUKKAN_API_KEY_GROQ_LU_DI_SINI]';
+  const model = document.getElementById('modelSelect')
+    ? document.getElementById('modelSelect').value
+    : 'llama-3.1-70b-versatile';
+
+  // UI: loading
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="loading-orb" style="width:18px;height:18px;border-width:2px"></div> <span>Memproses...</span>';
+
+  const outputStatus = document.getElementById('outputStatus');
+  const outputStatusText = document.getElementById('outputStatusText');
+  outputStatus.className = 'output-status active';
+  outputStatusText.textContent = 'Memproses';
+
+  showLoadingState('Mengekstrak Data & Konteks...');
+
+  await delay(900);
+  showLoadingState('Menjalankan DISC Psychological Profiling...');
+
+  await delay(800);
+  showLoadingState('Mengaktifkan Jessica Brain AI Logic Injection...');
+
+  // === SYSTEM PROMPT (The Jessica Clone Logic) ===
+  const systemPrompt = `Anda adalah AI Clone dari Jessica, seorang Top Leader di Allianz Insurance Indonesia dengan pengalaman lebih dari 10 tahun. Gaya Anda: profesional namun hangat, manusiawi, tidak memaksa, fokus pada nilai proteksi bukan biaya premi, dan menggunakan analogi yang kuat dan sederhana (seperti 'ban serep', 'payung', 'warisan kasih sayang', 'tabungan cinta untuk keluarga').
+
+Saat diberi sebuah objeksi atau kasus nasabah, Anda HARUS merespons dengan format berikut PERSIS:
+
+## 🔍 ANALISA PSIKOLOGI (DISC)
+[Deteksi tipe kepribadian DISC nasabah dari konteks. Jelaskan kebutuhan emosional tersembunyi dan ketakutan utama mereka dalam 2-3 kalimat.]
+
+## 🎯 AKAR KEBERATAN SEJATI
+[Jelaskan apa keberatan SEBENARNYA di balik kata-kata nasabah — bukan yang diucapkan, tapi yang dirasakan. 2-3 kalimat.]
+
+## 🌿 ANALOGI KHAS JESSICA
+[Berikan 1 analogi kuat dan unik ala Jessica yang relevan dengan konteks ini. Analoginya harus mudah dipahami orang awam, menyentuh sisi emosional, dan membuat nasabah "Ohhh iya ya..." Jelaskan cara menggunakannya.]
+
+## 💬 SKRIP RESPON PRESISI
+[Berikan skrip kata-kata PERSIS yang bisa langsung diucapkan agen kepada nasabah. Gunakan bahasa Indonesia yang hangat, natural, dan persuasif. Skrip harus 4-6 kalimat. Jangan terlalu panjang.]
+
+## ✅ LANGKAH CLOSING BERIKUTNYA
+[Berikan 2-3 langkah konkret yang harus dilakukan agen setelah menyampaikan respons tersebut.]
+
+Selalu gunakan Bahasa Indonesia. Jangan gunakan bahasa teknis asuransi yang membingungkan. Fokus pada nilai proteksi keluarga dan legacy.`;
+
+  const userMessage = `Kasus/Objeksi Nasabah:\n\n${input}`;
+
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: 1200,
+        temperature: 0.72,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    const aiText = data.choices?.[0]?.message?.content || 'Tidak ada respons dari AI.';
+
+    analysisCount++;
+    document.getElementById('totalAnalysisStat').textContent = analysisCount;
+    renderBriefingCard(input, aiText);
+    outputStatusText.textContent = 'Selesai · ' + new Date().toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'});
+
+  } catch (err) {
+    // Handle API key placeholder or real error
+    if (apiKey === '[MASUKKAN_API_KEY_GROQ_LU_DI_SINI]' || err.message.includes('401') || err.message.includes('invalid_api_key')) {
+      renderDemoOutput(input);
+      outputStatusText.textContent = 'Demo Mode Aktif';
+    } else {
+      showErrorOutput(`❌ Gagal menghubungi Groq API: ${err.message}`);
+      outputStatusText.textContent = 'Error';
+      outputStatus.className = 'output-status';
+    }
+  }
+
+  // Reset button
+  btn.disabled = false;
+  btn.innerHTML = '<span>🧠</span><span>Jalankan Analisa Logika Digital</span>';
+}
+
+/* ===============================================
+   RENDER BRIEFING CARD (Real AI output)
+   =============================================== */
+function renderBriefingCard(inputText, aiText) {
+  const ts = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+  const truncated = inputText.length > 80 ? inputText.substring(0, 80) + '...' : inputText;
+
+  const formattedText = aiText
+    .replace(/## 🔍 ANALISA PSIKOLOGI \(DISC\)/g, '<div class="briefing-section"><div class="briefing-section-title">🔍 ANALISA PSIKOLOGI (DISC)</div><div class="brief-prose">')
+    .replace(/## 🎯 AKAR KEBERATAN SEJATI/g, '</div></div><div class="briefing-section"><div class="briefing-section-title">🎯 AKAR KEBERATAN SEJATI</div><div class="brief-prose">')
+    .replace(/## 🌿 ANALOGI KHAS JESSICA/g, '</div></div><div class="briefing-section"><div class="briefing-section-title">🌿 ANALOGI KHAS JESSICA</div><div class="brief-prose">')
+    .replace(/## 💬 SKRIP RESPON PRESISI/g, '</div></div><div class="briefing-section"><div class="briefing-section-title">💬 SKRIP RESPON PRESISI</div><div class="brief-prose">')
+    .replace(/## ✅ LANGKAH CLOSING BERIKUTNYA/g, '</div></div><div class="briefing-section"><div class="briefing-section-title">✅ LANGKAH CLOSING BERIKUTNYA</div><div class="brief-prose">')
+    + '</div></div>';
+
+  document.getElementById('outputBody').innerHTML = `
+    <div class="briefing-card">
+      <div class="briefing-header">
+        <span class="briefing-badge">🧠 JESSICA BRAIN · OUTPUT</span>
+        <span class="briefing-ts">${ts}</span>
+      </div>
+
+      <div class="briefing-section">
+        <div class="briefing-section-title">📌 KASUS DIANALISA</div>
+        <div style="font-size:12px;color:var(--text-secondary);background:var(--bg-input);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);line-height:1.6;font-style:italic">"${truncated}"</div>
+      </div>
+
+      ${formattedText}
+
+      <div style="display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+        <button class="copy-btn" onclick="copyOutput()">📋 Salin Skrip</button>
+        <button class="copy-btn" onclick="showToast('📩 Brief dikirim ke agen (simulasi)')">📩 Kirim ke Agen</button>
+      </div>
+    </div>`;
+}
+
+/* ===============================================
+   DEMO OUTPUT (when no API key)
+   =============================================== */
+function renderDemoOutput(inputText) {
+  const ts = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+  const truncated = inputText.length > 80 ? inputText.substring(0, 80) + '...' : inputText;
+
+  document.getElementById('outputBody').innerHTML = `
+    <div class="briefing-card">
+      <div class="briefing-header">
+        <span class="briefing-badge">🎭 DEMO MODE · TANPA API KEY</span>
+        <span class="briefing-ts">${ts}</span>
+      </div>
+
+      <div style="padding:10px 12px;margin-bottom:14px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);font-size:11.5px;color:var(--accent-amber);line-height:1.6">
+        ⚠️ <strong>Demo Output</strong> — Masukkan Groq API Key di halaman Pengaturan untuk mendapatkan analisa AI real-time dari Jessica Brain.
+      </div>
+
+      <div class="briefing-section">
+        <div class="briefing-section-title">📌 KASUS DIANALISA</div>
+        <div style="font-size:12px;color:var(--text-secondary);background:var(--bg-input);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);line-height:1.6;font-style:italic">"${truncated}"</div>
+      </div>
+
+      <div class="briefing-section">
+        <div class="briefing-section-title">🔍 ANALISA PSIKOLOGI (DISC)</div>
+        <div class="brief-prose">Nasabah ini menunjukkan profil <strong style="color:var(--accent-teal)">DISC tipe S (Steadiness)</strong> — mereka adalah pengambil keputusan yang lambat, sangat mementingkan keamanan dan konsistensi. Ketakutan tersembunyi mereka bukan soal uang, melainkan rasa takut membuat keputusan yang "salah" yang akan disesali kemudian hari. Mereka butuh validasi dan rasa aman sebelum commit.</div>
+      </div>
+
+      <div class="briefing-section">
+        <div class="briefing-section-title">🎯 AKAR KEBERATAN SEJATI</div>
+        <div class="brief-prose">Di balik kata-kata "mahal" atau "sudah ada asuransi kantor", sebenarnya nasabah ini menyimpan pertanyaan yang tidak terucap: <em>"Apakah ini benar-benar penting untuk keluargaku? Apa yang akan terjadi jika aku tidak ambil ini?"</em> Mereka belum merasakan urgensi personal. Tugas agen bukan menjual produk — tapi membantu nasabah melihat "bayangan masa depan" yang perlu mereka proteksi hari ini.</div>
+      </div>
+
+      <div class="briefing-section">
+        <div class="briefing-section-title">🌿 ANALOGI KHAS JESSICA</div>
+        <div class="brief-prose"><strong style="color:var(--accent-teal)">Analogi "Ban Serep":</strong> "Pak/Bu, boleh saya tanya — mobilnya pasti punya ban serep kan? Kapan terakhir pakai ban serep itu? Mungkin tidak pernah, atau sudah lama sekali. Tapi tetap kita bawa ke mana-mana. Kenapa? Karena kita tidak berencana untuk ban kempes, tapi kita bersiap. Asuransi ini persis seperti ban serep untuk keluarga Bapak/Ibu — bukan karena kita berencana sakit atau meninggal, tapi karena kita sayang keluarga terlalu besar untuk tidak bersiap."</div>
+      </div>
+
+      <div class="briefing-section">
+        <div class="briefing-section-title">💬 SKRIP RESPON PRESISI</div>
+        <div class="brief-prose">"Saya sangat menghargai kehati-hatian Bapak/Ibu. Justru karena itulah saya ingin berbagi satu hal penting. Asuransi kantor itu luar biasa — tapi tahukah Bapak/Ibu bahwa manfaatnya otomatis berhenti di hari terakhir bekerja? Di sinilah perbedaan yang kita bicarakan hari ini. Kita tidak beli asuransi untuk diri kita sendiri — kita beli untuk orang yang akan ditinggalkan. Dan cinta kita untuk mereka tidak perlu menunggu momen yang 'tepat' untuk dimulai."</div>
+      </div>
+
+      <div class="briefing-section">
+        <div class="briefing-section-title">✅ LANGKAH CLOSING BERIKUTNYA</div>
+        <div class="brief-prose">1. Setelah menyampaikan skrip, tanyakan: <em>"Jika ada satu hal yang Bapak/Ibu ingin pastikan terlindungi untuk keluarga, apa itu?"</em> — biarkan mereka yang berbicara.
+2. Tunjukkan ilustrasi manfaat spesifik yang sudah dipersonalisasi dengan data keluarga mereka.
+3. Tawarkan closing dengan framing ringan: <em>"Kita mulai dari proteksi dasar dulu — preminya setara satu kali makan keluarga di restoran."</em></div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+        <button class="copy-btn" onclick="copyOutput()">📋 Salin Skrip</button>
+        <button class="copy-btn" onclick="showToast('📩 Brief dikirim ke agen (simulasi)')">📩 Kirim ke Agen</button>
+        <button class="copy-btn" onclick="navigate('settings')" style="margin-left:auto;color:var(--accent-amber);border-color:rgba(245,158,11,0.3)">⚙️ Setup API Key</button>
+      </div>
+    </div>`;
+
+  document.getElementById('outputStatus').className = 'output-status active';
+}
+
+function showErrorOutput(msg) {
+  document.getElementById('outputBody').innerHTML = `
+    <div style="padding:20px;text-align:center">
+      <div style="font-size:30px;margin-bottom:12px">❌</div>
+      <p style="font-size:13px;color:var(--accent-rose);margin-bottom:8px;font-weight:600">Gagal Menghubungi AI</p>
+      <p style="font-size:12px;color:var(--text-muted);line-height:1.6">${msg}</p>
+      <button class="copy-btn" style="margin:12px auto 0;display:flex" onclick="navigate('settings')">⚙️ Periksa API Key</button>
+    </div>`;
+}
+
+/* ===============================================
+   LOADING STATE
+   =============================================== */
+function showLoadingState(step) {
+  document.getElementById('outputBody').innerHTML = `
+    <div class="loading-state">
+      <div class="loading-orb"></div>
+      <p>Jessica Brain sedang berpikir...</p>
+      <span class="step">▶ ${step}</span>
+    </div>`;
+}
+
+/* ===============================================
+   COPY OUTPUT
+   =============================================== */
+function copyOutput() {
+  const text = document.getElementById('outputBody').innerText;
+  navigator.clipboard?.writeText(text).then(() => showToast('✅ Skrip berhasil disalin!')).catch(() => showToast('ℹ️ Gunakan Ctrl+C untuk menyalin'));
+}
+
+/* ===============================================
+   SAVE SETTINGS
+   =============================================== */
+function saveSettings() {
+  showToast('✅ Konfigurasi berhasil disimpan!');
+}
+
+/* ===============================================
+   TOAST
+   =============================================== */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.style.display = 'flex';
+  t.className = 'success-toast';
+  setTimeout(() => {
+    t.className = 'success-toast hide';
+    setTimeout(() => t.style.display = 'none', 300);
+  }, 2800);
+}
+
+/* ===============================================
+   UTILITY
+   =============================================== */
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+/* ===============================================
+   INIT
+   =============================================== */
+function init() {
+  renderAgentTable('all');
+  renderScenarioTags();
+  renderKPIRings();
+  initDashboardCharts();
+  chartsInitialized = true;
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
